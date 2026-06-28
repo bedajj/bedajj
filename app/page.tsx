@@ -1,19 +1,24 @@
 'use client';
 
-import { useDigitsTrading } from '../hooks/use-digits-trading';
+import { useSmartChartsApi } from '@/hooks/use-smartcharts-api';
+import { useSmartChartChartData } from '@/hooks/use-smartchart-chart-data';
+import { useRiseFallTrading } from '../hooks/use-rise-fall-trading';
 import { useDerivWSContext } from '@/components/custom/deriv-ws-provider';
 import { useLogoSrc } from '@/components/custom/logo-src-provider';
-import { DigitsView } from '../components/digits-view';
+import { RiseFallView } from '../components/rise-fall-view';
 
-export default function DigitsPage() {
+export default function RiseFallPage() {
   const logoSrc = useLogoSrc();
   const { ws, isConnected, isExhausted, auth } = useDerivWSContext();
   const { authState, accounts, activeAccount, login, signUp, logout, switchAccount } = auth;
 
-  const trading = useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated: !!auth.wsUrl, onAuthWSFailed: logout });
+  const trading = useRiseFallTrading({ ws, isConnected, isExhausted, isAuthenticated: !!auth.wsUrl, onAuthWSFailed: logout });
+
+  const { chartData } = useSmartChartChartData(trading.ws, trading.isConnected, trading.symbols);
+  const { getQuotes, subscribeQuotes, unsubscribeQuotes } = useSmartChartsApi(trading.ws);
 
   return (
-    <DigitsView
+    <RiseFallView
       authState={authState}
       accounts={accounts}
       activeAccount={activeAccount}
@@ -22,34 +27,40 @@ export default function DigitsPage() {
       onLogout={logout}
       onSwitchAccount={switchAccount}
       logoSrc={logoSrc}
+      ws={trading.ws}
       isConnected={trading.isConnected}
       isLoading={trading.isLoading}
       error={trading.error}
-      symbols={trading.symbols}
       activeSymbol={trading.activeSymbol}
       selectSymbol={trading.selectSymbol}
-      currentTick={trading.currentTick}
-      lastDigit={trading.lastDigit}
-      digitStats={trading.digitStats}
-      pipSize={trading.pipSize}
-      tradeType={trading.tradeType}
-      setTradeType={trading.setTradeType}
-      contractMode={trading.contractMode}
-      setContractMode={trading.setContractMode}
-      selectedDigit={trading.selectedDigit}
-      setSelectedDigit={trading.setSelectedDigit}
+      direction={trading.direction}
+      setDirection={trading.setDirection}
+      allowEquals={trading.allowEquals}
+      setAllowEquals={trading.setAllowEquals}
       stake={trading.stake}
       setStake={trading.setStake}
       duration={trading.duration}
       setDuration={trading.setDuration}
-      durationLimits={trading.durationLimits}
+      durationOptions={trading.durationOptions}
+      durationUnit={trading.durationUnit}
+      setDurationUnit={trading.setDurationUnit}
+      endDate={trading.endDate}
+      setEndDate={trading.setEndDate}
+      endTime={trading.endTime}
+      setEndTime={trading.setEndTime}
       proposal={trading.proposal}
-      isProposalLoading={trading.isProposalLoading}
       buyContract={trading.buyContract}
       isBuying={trading.isBuying}
       buyResult={trading.buyResult}
       buyError={trading.buyError}
       clearBuyResult={trading.clearBuyResult}
+      openPositions={trading.openPositions}
+      sellContract={trading.sellContract}
+      sellingId={trading.sellingId}
+      chartData={chartData}
+      getQuotes={getQuotes}
+      subscribeQuotes={subscribeQuotes}
+      unsubscribeQuotes={unsubscribeQuotes}
     />
   );
 }
